@@ -3,14 +3,26 @@ using System.Collections;
 
 public class MenuController : MonoBehaviour {
 
-	public GUIText starsControl;
+    /*
+    * Summary - MenuController - Controller for main menu
+    * This class contains the logic and mediator for menu
+    * - using PlayerPref to retain the score and sound settings
+    * - Randomize spike wall behavior
+    * - Game State for the peril in the game
+    * - using iTween library
+   */
+
+    #region public variables
+
+    public GUIText starsControl;
 	public GUIText medhighScoreTxt;
 	public GUIText hardhighScoreTxt;
-
 	public GameObject medButton;
 	public GameObject hardButton;
-	
-	void Update () {
+
+    #endregion
+
+    void Update () {
 		// Handle Back Button
 		if (Input.GetKey (KeyCode.Escape)) {
 			Application.Quit();
@@ -18,8 +30,8 @@ public class MenuController : MonoBehaviour {
 	}
 	// Use this for initialization
 	void Start () {
-		if (PlayerPrefs.HasKey ("HighScore")) {
-			int highPoints = PlayerPrefs.GetInt ("HighScore");
+		if (PlayerPrefs.HasKey (Utility.PREF_KEY_HIGH_TIME)) {
+            int highPoints = PlayerPrefs.GetInt(Utility.PREF_KEY_HIGH_TIME);
 			starsControl.text = setStars(highPoints);
 			starsControl.enabled = true;
 		}else{
@@ -54,16 +66,18 @@ public class MenuController : MonoBehaviour {
 
 	private void setHighTimes(){
 		// Medium
-		if (PlayerPrefs.HasKey ("HighTime2")) {
-			medhighScoreTxt.text = "Top Time: " + formatLapsedTime(PlayerPrefs.GetFloat("HighTime2")).ToString();
+        if (PlayerPrefs.HasKey(Utility.PREF_KEY_HIGH_SCORE_2))
+        {
+            medhighScoreTxt.text = "Top Time: " + formatLapsedTime(PlayerPrefs.GetFloat(Utility.PREF_KEY_HIGH_SCORE_2)).ToString();
 			medhighScoreTxt.enabled = true;
 		}else{
 			medhighScoreTxt.enabled = false;
 		}
 		
 		// Hard
-		if (PlayerPrefs.HasKey ("HighTime3")) {
-			hardhighScoreTxt.text = "Top Time: " + formatLapsedTime(PlayerPrefs.GetFloat("HighTime3")).ToString();
+        if (PlayerPrefs.HasKey(Utility.PREF_KEY_HIGH_SCORE_3))
+        {
+            hardhighScoreTxt.text = "Top Time: " + formatLapsedTime(PlayerPrefs.GetFloat(Utility.PREF_KEY_HIGH_SCORE_3)).ToString();
 			hardhighScoreTxt.enabled = true;
 		}else{
 			hardhighScoreTxt.enabled = false;
@@ -79,7 +93,7 @@ public class MenuController : MonoBehaviour {
 		return  min + ":" + secs;
 	}
 
-	string setStars(int points){
+	private string setStars(int points){
 		string starsText = "";
 		if (points <= 40)
 		{

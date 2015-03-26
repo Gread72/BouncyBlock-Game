@@ -2,6 +2,10 @@
 using System.Collections;
 
 public class UseWinPlugin : MonoBehaviour {
+    /*
+   * Summary - UseWinPlugin - Win Plugin Class
+   * Testing how to build a windoes based plugin
+  */
 
     private Rect m_ScreenRectangle;
     private string m_DeviceName;

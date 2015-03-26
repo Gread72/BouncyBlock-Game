@@ -1,21 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EdgeHazardController : MonoBehaviour {
-	
-	enum GameState{
+public class EdgeHazardController : MonoBehaviour
+{
+    /*
+    * Summary - EdgeHazardController - Controller for edge components
+    * This class contains the logic for peril of wall spikes
+    * - The timing and animation based on the current Game level
+    * - Randomize spike wall behavior
+    * - Game State for the peril in the game
+    * - using iTween library
+   */
+
+    #region public variables
+    public enum GameState{
 		UNLIMITED = 0,
 		EASY = 1,
 		MEDIUM = 2,
 		HARD = 3
 	}
 
-	/*
-	static string GAME_STATE_UNLIMTED = "UNLIMITED";
-	static string GAME_STATE_EASY = "EASY";
-	static string GAME_STATE_MEDIUM = "MEDIUM";
-	static string GAME_STATE_HARD = "HARD";
-	*/
 	public GameObject edge1;
 	public GameObject edge2;
 	public GameObject edge3;
@@ -26,60 +30,33 @@ public class EdgeHazardController : MonoBehaviour {
 
 	public float onPosX = 3.29f;
 	public float offPosX = 4f;
-
 	public float timeAnim = .9f;
+    public GameState gameState = 0;
+    
+    #endregion
 
-	private int currentRandNum = -1;
-
+    #region private variables
+    
+    private int currentRandNum = -1;
     private float currentElapseTime = 0;
-	
-	public int gameState = 0;
 
-	//private int[] edgeToDisplay = new int[4]; 
+    #endregion
 
-	// Use this for initialization
+    // Use this for initialization
 	void Start() {
-		//gameState = (int)GameState.UNLIMITED;
 		Reset(0); //reset the series of edge blocks
 	}
 
 	public void Reset(float currentTime){
 		currentElapseTime = currentTime;
-		//edge1.SetActive(false);
-		setPosition (edge1, offPosX);
-
-		//edge2.SetActive(false);
-		setPosition (edge2, offPosX);
-
-		//edge3.SetActive(false);
-		setPosition (edge3, offPosX);
-
-		//edge4.SetActive(false);
-		setPosition (edge4, offPosX);
-
-		//edge5.SetActive(false);
-		setPosition (edge5, offPosX);
-
+		
+        setPosition (edge1, offPosX);
+        setPosition (edge2, offPosX);
+        setPosition (edge3, offPosX);
+        setPosition (edge4, offPosX);
+        setPosition (edge5, offPosX);
         setPosition(edge6, offPosX);
-
         setPosition(edge7, offPosX);
-	}
-
-	private void setPosition(GameObject gameObj, float xPos){
-		Vector3 currentPosition = gameObj.transform.position;
-		currentPosition.x = xPos;
-
-		gameObj.transform.position = currentPosition;
-	}
-
-	private void animate(GameObject gameObj, bool isOn, float time){
-		Vector3 currentPosition = gameObj.transform.position;
-		if (isOn) {
-			currentPosition.x = onPosX;
-		} else {
-			currentPosition.x = offPosX;
-		}
-		iTween.MoveTo(gameObj, iTween.Hash("time",time, "position",currentPosition) );
 	}
 
 	public void Change(float currentTime) {
@@ -304,30 +281,50 @@ public class EdgeHazardController : MonoBehaviour {
 
 	}
 
+    private void setPosition(GameObject gameObj, float xPos)
+    {
+        Vector3 currentPosition = gameObj.transform.position;
+        currentPosition.x = xPos;
+        gameObj.transform.position = currentPosition;
+    }
+
+    private void animate(GameObject gameObj, bool isOn, float time)
+    {
+        Vector3 currentPosition = gameObj.transform.position;
+        if (isOn)
+        {
+            currentPosition.x = onPosX;
+        }
+        else
+        {
+            currentPosition.x = offPosX;
+        }
+        iTween.MoveTo(gameObj, iTween.Hash("time", time, "position", currentPosition));
+    }
+
 	private int getSpikeValue(float currentTime){
 		int randNum;
 
 		switch(gameState){
-			case (int)GameState.EASY:
+			case GameState.EASY:
 			currentElapseTime = 1.9f;
 			break;
 
-			case (int)GameState.MEDIUM:
+			case GameState.MEDIUM:
 			currentElapseTime = 2.9f;
 			break;
 
-			case (int)GameState.HARD:
+			case GameState.HARD:
 			currentElapseTime = 3.9f;
 			break;
 
-			case (int)GameState.UNLIMITED:
+			case GameState.UNLIMITED:
 			default:
-			currentElapseTime = Mathf.Floor(currentTime / 60); //currentElapseTime + (Time.deltaTime) * 10;
+			currentElapseTime = Mathf.Floor(currentTime / 60);
 			break;
 		}
 
-		Debug.Log("currentElapseTime " + currentElapseTime);
-
+		//Debug.Log("currentElapseTime " + currentElapseTime);
 		//currentElapseTime = //0.9f - start //1.9f - easy //2.9f - medium //5f - easy to hard; //3.9f - hard;
 
 		if (currentElapseTime < 1)

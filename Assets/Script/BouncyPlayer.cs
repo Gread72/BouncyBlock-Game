@@ -1,42 +1,63 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BouncyPlayer : MonoBehaviour {
+public class BouncyPlayer : MonoBehaviour
+{
+    /*
+     * Summary - BouncyPlayer - player/GameObject square class
+     * This class contains the logic for the player element - bouncy square
+     * - Physics of Gameobject
+     * - Current points and high score
+     * - Sound setting
+    */
 
+    #region public variables
+
+    [SerializeField]
 	public float speed = 1f;
-	public bool enable = false;
-	public bool moveLeft = true;
-	public bool playerHit = false;
-	public bool clearHighScore = false;
+    
+    [HideInInspector]
+    public int points = 0;
 
-	public int points = 0;
-	public int highPoints = 0;
+    [HideInInspector]
+    public int highPoints = 0;
+
+    [HideInInspector]
+	public bool enable = false;
+
+    [HideInInspector]
+	public bool moveLeft = true;
+
+    [HideInInspector]
+	public bool playerHit = false;
+
+    [HideInInspector]
+	public bool clearHighScore = false;
 
 	public AudioClip correctSound;
 	public AudioClip errorSound;
 
+    #endregion
 
-	private bool soundEnabled = true;
+    #region private variables
+    
+    private bool soundEnabled = true;
+    private static string COLLISION_OBJECT_NAME = "EdgeCubeElement";
+    #endregion
 
-	// Use this for initialization
+    // Use this for initialization
 	void Start () {
 		enable = false;
 		if(clearHighScore) PlayerPrefs.DeleteAll ();
-		if (PlayerPrefs.HasKey ("HighScore")) {
-			highPoints = PlayerPrefs.GetInt ("HighScore");
+		if (PlayerPrefs.HasKey (Utility.PREF_KEY_HIGH_SCORE)) {
+            highPoints = PlayerPrefs.GetInt(Utility.PREF_KEY_HIGH_SCORE);
 		}
 
 		gameObject.rigidbody.useGravity = false;
-		gameObject.renderer.material.color = Color.clear; //convertRGBNumToDecimal (255, 255, 255, 255);
+		gameObject.renderer.material.color = Color.clear;
 
 		getSoundSetting ();
 
-	}
-
-	static Color convertRGBNumToDecimal(float r, float g, float b,float a){
-		Color color = new Color(r/255.0F,g/255.0F,b/255.0F,a/255.0F);
-		
-		return color;
 	}
 	
 	// Update is called once per frame
@@ -51,16 +72,14 @@ public class BouncyPlayer : MonoBehaviour {
 			} else {
 					newPosition.x = transform.position.x + ((speed) * Time.deltaTime);
 			}
-		} else {
-			//gameObject.rigidbody.useGravity = false;
-			//newPosition.y = 0;
-		}
+		} 
 		transform.position = newPosition;
 	}
 
-	void OnCollisionEnter(Collision collision) {
-		//Debug.Log (collision.gameObject.name);
-		if (collision.gameObject.name == "EdgeCubeElement") {
+	public void OnCollisionEnter(Collision collision) {
+
+        if (collision.gameObject.name == COLLISION_OBJECT_NAME)
+        {
 			if(playerHit == false){
 				if(soundEnabled){
 					audio.clip = errorSound;
@@ -69,10 +88,9 @@ public class BouncyPlayer : MonoBehaviour {
 			}
 			playerHit = true;
 			gameObject.renderer.material.color = Color.red;
-			//Debug.Log("highPoints " + highPoints);
 			if(points > highPoints){
 				highPoints = points;
-				PlayerPrefs.SetInt ("HighScore",highPoints);
+				PlayerPrefs.SetInt (Utility.PREF_KEY_HIGH_SCORE,highPoints);
 			}
 			return;
 		} else {
@@ -97,8 +115,9 @@ public class BouncyPlayer : MonoBehaviour {
 
 	private void getSoundSetting(){
 		int soundEnabledValue;
-		if (PlayerPrefs.HasKey ("SoundOn")) {
-			soundEnabledValue = PlayerPrefs.GetInt ("SoundOn");
+        if (PlayerPrefs.HasKey(Utility.PREF_KEY_SOUND_ON))
+        {
+            soundEnabledValue = PlayerPrefs.GetInt(Utility.PREF_KEY_SOUND_ON);
 			if(soundEnabledValue > 0)
 			{
 				soundEnabled = true;

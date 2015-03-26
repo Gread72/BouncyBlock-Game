@@ -2,24 +2,35 @@
 using System.Collections;
 
 public class MenuItemScript : MonoBehaviour {
+    /*
+     * Summary - MenuItemScript - Menu Item class
+     * Repurposed script for menu item components
+     * - Load level
+     * - External link
+    */
 
-	public string goToScene = "";
+    #region public variables
+    [SerializeField]
+    public string goToScene = "";
+    
+    [SerializeField]
+    public bool enabled = true;
+    
+    [SerializeField]
+    public bool isExternalLink = false;
 
-	public bool enabled = true;
-	public bool isExternalLink = false;
-	public bool isAction = false;
+    [SerializeField]
+    public bool isAction = false;
 
-	public GameObject target;
-	public Vector3 originPosition;
-	public Vector3 newPosition;
+	//public GameObject target;
+	//public Vector3 originPosition;
+    //public Vector3 newPosition;
+    #endregion
 
-	void OnMouseDown() {
-		//Debug.Log ("Mouse Click");
+    void OnMouseDown() {
 		if(enabled == true) {
 			if(isExternalLink == false) {
-				if(isAction == true){
-					//iTween.MoveTo(target, iTween.Hash("x", newPosition.x, "y", newPosition.y));
-				}else{
+				if(isAction == false){
 					Application.LoadLevel(goToScene);
 				}
 			}else if(isExternalLink == true){

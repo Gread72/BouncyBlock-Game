@@ -2,17 +2,34 @@
 using System.Collections;
 
 public class SoundEnableScript : MonoBehaviour {
+    /*
+    * Summary - SoundEnableScript - Sound Enable script
+    * Repurposed script for Sound Enable button component
+   */
 
-	public bool soundEnabled = true;
-	public GUIText textUI;
-	private int soundEnabledValue = 1;
+    #region public variables
+    
+    [SerializeField]
+    public bool soundEnabled = true;
+
+    [SerializeField]
 	public bool isMouseLock = false;
+    
+    public GUIText textUI;
+    
+    #endregion
 
-	void Start () 
+    #region private variables
+    
+    private int soundEnabledValue = 1;
+
+    #endregion
+
+    void Start () 
 	{
-		if (PlayerPrefs.HasKey ("SoundOn")) 
+		if (PlayerPrefs.HasKey (Utility.PREF_KEY_SOUND_ON)) 
 		{
-			soundEnabledValue = PlayerPrefs.GetInt ("SoundOn");
+            soundEnabledValue = PlayerPrefs.GetInt(Utility.PREF_KEY_SOUND_ON);
 			if(soundEnabledValue > 0)
 			{
 				soundEnabled = true;
@@ -36,19 +53,17 @@ public class SoundEnableScript : MonoBehaviour {
 
 	private void setSoundSettings(bool setValue = true){
 		if (soundEnabled) {
-			if(setValue) PlayerPrefs.SetInt ("SoundOn",1);
+            if (setValue) PlayerPrefs.SetInt(Utility.PREF_KEY_SOUND_ON, 1);
 			textUI.text = "Sound On";
 		} else {
-			if(setValue) PlayerPrefs.SetInt ("SoundOn",0);
+            if (setValue) PlayerPrefs.SetInt(Utility.PREF_KEY_SOUND_ON, 0);
 			textUI.text = "Sound Off";
 		}
 
 		StartCoroutine("ResetLock");
 	}
-
 	
 	IEnumerator ResetLock(){
-		//Debug.Log ("ResetLock");
 		yield return new WaitForSeconds(1);
 		isMouseLock = false;
 	}

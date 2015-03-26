@@ -2,9 +2,17 @@
 using System.Collections;
 
 public class GameController : MonoBehaviour {
-	public Camera mainCamera;
-	public GameObject player;
 
+    /*
+    * Summary - GameController - GameController class
+    * This class is the main controller for the game, the glue to the UI, player square, input, time and spike wall peril 
+    * - using PlayerPref to retain the score and sound settings
+    * - display Current points and high score
+   */
+
+    #region public variables
+    public Camera mainCamera;
+	public GameObject player;
 	public GUIText menuBackTxt;
 	public GUIText soundEnableTxt;
 	public GUIText pointsTxt;
@@ -13,56 +21,59 @@ public class GameController : MonoBehaviour {
     public GUIText starsControl;
 	public GUIText timeTxt;
 	public GUIText highTimeText;
-
 	public GUISkin skin;
-
 	public GameObject leftEdge;
 	public GameObject rightEdge;
+    public bool isTimedGame = false;
 
-	public int forceToApply = 150; 
-	private bool gamePlaying = false;
+    [SerializeField]
+    [HideInInspector]
+	public int forceToApply = 150;
 
+    #endregion
+
+    #region private variables
+    private bool gamePlaying = false;
 	private bool hasDirectionChanged = true;
-
 	private BouncyPlayer playerScript;
 	private EdgeHazardController leftEdgeScript;
 	private EdgeHazardController rightEdgeScript;
 	private MenuItemScript menuItemScript;
 	private SoundEnableScript soundEnableScript;
-
 	private bool isMouseLock = true;
-
 	private float startTime = 0;
 	private float currentElapseTime = 0;
+    private static string INSTR_TIMED_GAME = "Play/Start:\nTouch Screen\nEarn top time";
+    private static string INSTR_REG_GAME = "Play/Start:\nTouch Screen\nEarn up to five stars";
+    private static string INSTR_REPLAY_GAME = "Touch to Replay";
+    #endregion
 
-	public bool isTimedGame = false;
-
-	// Use this for initialization
+    // Use this for initialization
 	void Start () {
 
+        // tweek the force applied to the clock based on the device
 		#if UNITY_IPHONE 
 			Debug.Log("Iphone");
 			forceToApply = 40;
 		#else
-			Debug.Log("Android or Windows");
+			//Debug.Log("Android or Windows");
 			forceToApply = 25;
 		#endif
 
-		mainCamera.backgroundColor = convertRGBNumToDecimal(66,121,49,5);
+        // initial background color
+        mainCamera.backgroundColor = Utility.convertRGBNumToDecimal(66, 121, 49, 5);
 
+        // get reference to player, left and right wall edge, menu and sound enabled
 		playerScript = player.GetComponent<BouncyPlayer>();
-
 		leftEdgeScript = leftEdge.GetComponent<EdgeHazardController>();
-
 		rightEdgeScript = rightEdge.GetComponent<EdgeHazardController>();
-
         menuItemScript = menuBackTxt.GetComponentInChildren<MenuItemScript>();
 		soundEnableScript = soundEnableTxt.GetComponentInChildren<SoundEnableScript>();
 
 		if(isTimedGame == true){
-			instructTxt.text = "Play/Start:\nTouch Screen\nEarn top time";
+            instructTxt.text = INSTR_TIMED_GAME;
 		}else{
-			instructTxt.text = "Play/Start:\nTouch Screen\nEarn up to five stars";
+            instructTxt.text = INSTR_REPLAY_GAME;
 		}
 
 		timeTxt.enabled = false;
@@ -74,7 +85,7 @@ public class GameController : MonoBehaviour {
 
 		if (soundEnableScript.isMouseLock == false) {
 			timeTxt.text = "Time: " + formatLapsedTime (currentElapseTime);
-			starsControl.text = setStars (playerScript.points);
+            starsControl.text = Utility.setStars(playerScript.highPoints, playerScript.points);
 			highTimeText.text = getHighestTime (currentElapseTime);
 		}
 
@@ -86,7 +97,7 @@ public class GameController : MonoBehaviour {
 		// mouse/touch control
         if (Input.GetMouseButton(0) && isMouseLock == false){
 			if(soundEnableScript.isMouseLock == true){
-				Debug.Log("MouseLock on SoundEnableText");
+				//Debug.Log("MouseLock on SoundEnableText");
 				return;
 			}
             if (gamePlaying == false){ // click to play
@@ -103,7 +114,7 @@ public class GameController : MonoBehaviour {
 			highScoreTxt.enabled = true;
 			highScoreTxt.text = "High Score : " + playerScript.highPoints.ToString();
             //starsControl.enabled = true;
-			starsControl.text = setStars(playerScript.points);
+            starsControl.text = Utility.setStars(playerScript.highPoints, playerScript.points);
 			return; /// will ignore all other script below
 		}else{
 			timeTxt.enabled = true;
@@ -120,16 +131,16 @@ public class GameController : MonoBehaviour {
 			menuBackTxt.enabled = true;
 			soundEnableTxt.enabled = true;
             menuItemScript.enabled = true;
-            instructTxt.text = "Touch to Replay";
+            instructTxt.text = INSTR_REPLAY_GAME;
             instructTxt.enabled = true;
 			highScoreTxt.enabled = true;
 			highScoreTxt.text = "High Score : " + playerScript.highPoints.ToString();
 
-			starsControl.text = setStars(playerScript.points);
+            starsControl.text = Utility.setStars(playerScript.highPoints, playerScript.points);
 		} else {
 			// reset color and player
 			playerScript.enable = true;
-			mainCamera.backgroundColor = convertRGBNumToDecimal(66,121,49,5);
+            mainCamera.backgroundColor = Utility.convertRGBNumToDecimal(66, 121, 49, 5);
 		}
 
 		// display points
@@ -149,21 +160,12 @@ public class GameController : MonoBehaviour {
 	}
 
 	IEnumerator ResetLock(){
-		//Debug.Log ("ResetLock");
 		yield return new WaitForSeconds(1);
 		isMouseLock = false;
 	}
 
-	static Color convertRGBNumToDecimal(float r, float g, float b,float a){
-		Color color = new Color(r/255.0F,g/255.0F,b/255.0F,a/255.0F);
-
-		return color;
-	}
-
 	private string formatLapsedTime(float time){
 		time = Mathf.Round(time);
-		//Debug.Log("Time:" + time);
-
 		string min = Mathf.Floor(time / 60).ToString("00");
 		string secs = (time % 60).ToString("00");
 		return  min + ":" + secs;
@@ -172,15 +174,16 @@ public class GameController : MonoBehaviour {
 	private string getHighestTime(float currentElapseTime){
 		float highTime = 0f;
 		float resultTime = 0f;
-		if (PlayerPrefs.HasKey ("HighTime" + leftEdgeScript.gameState)) {
-			highTime = PlayerPrefs.GetFloat ("HighTime" + leftEdgeScript.gameState);
+        if (PlayerPrefs.HasKey(Utility.PREF_KEY_HIGH_TIME + leftEdgeScript.gameState))
+        {
+            highTime = PlayerPrefs.GetFloat(Utility.PREF_KEY_HIGH_TIME + leftEdgeScript.gameState);
 			if(currentElapseTime > highTime){
 				highTime = currentElapseTime;
-				PlayerPrefs.SetFloat ("HighTime" + leftEdgeScript.gameState, highTime);
+                PlayerPrefs.SetFloat(Utility.PREF_KEY_HIGH_TIME + leftEdgeScript.gameState, highTime);
 			}
 			resultTime = highTime; 
 		}else{
-			PlayerPrefs.SetFloat ("HighTime" + leftEdgeScript.gameState, currentElapseTime);
+            PlayerPrefs.SetFloat(Utility.PREF_KEY_HIGH_TIME + leftEdgeScript.gameState, currentElapseTime);
 			resultTime = currentElapseTime;
 		}
 
@@ -189,6 +192,7 @@ public class GameController : MonoBehaviour {
 	}
 
     void startGamePlay(){
+        // setup the initial start of the game
         gamePlaying = true;
         playerScript.playerHit = false;
         playerScript.resetPosition();
@@ -202,41 +206,6 @@ public class GameController : MonoBehaviour {
 		rightEdgeScript.Reset(currentElapseTime);
         isMouseLock = false;
         highScoreTxt.enabled = false;
-        //starsControl.enabled = false;
-    }
-
-    string setStars(int points){
-		//Debug.Log("setStars " + points);
-        string starsText = "";
-		if(points < playerScript.highPoints){
-			points = playerScript.highPoints;
-		}
-		if (points <= 40)
-        {
-            starsText = "";
-        }
-		else if (points <= 80)
-        {
-            starsText = "*";
-        }
-		else if (points <= 125)
-        {
-            starsText = "* *";
-        }
-		else if (points <= 145)
-        {
-            starsText = "* * *";
-        }
-		else if (points <= 205)
-        {
-            starsText = "* * * *";
-        }
-		else if (points > 255)
-        {
-            starsText = "* * * * *";
-        }
-
-        return starsText;
     }
    
 }
